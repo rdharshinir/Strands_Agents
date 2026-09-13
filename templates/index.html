@@ -3,81 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeLedger Dashboard</title>
+    <title>LifeLedger AI Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f7; color: #1d1d1f; }
-        .container { max-width: 800px; margin: 0 auto; }
-        h1 { font-size: 24px; font-weight: 600; margin-bottom: 30px; }
-        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .btn { padding: 10px 15px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; font-size: 14px; margin-right: 10px; transition: background 0.2s; }
-        .btn-primary { background: #007aff; color: white; }
-        .btn-primary:hover { background: #0056b3; }
-        .btn-success { background: #34c759; color: white; }
-        .btn-danger { background: #ff3b30; color: white; }
-        .btn-warning { background: #ffcc00; color: #1d1d1f; }
-        .notification { padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #007aff; background: #f9f9f9; }
-        .urgency-high { border-left-color: #ff3b30; background: #fff0f0; }
-        .urgency-normal { border-left-color: #ffcc00; }
-        .urgency-info { border-left-color: #34c759; }
-        .actions { margin-top: 15px; }
-        .simulate-box { display: flex; gap: 10px; margin-bottom: 10px; }
-        .sim-btn { flex: 1; }
-        .timestamp { color: #86868b; font-size: 12px; margin-bottom: 5px; }
-        .status-badge { margin-top: 10px; display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; background: #e5e5ea; color: #1d1d1f; }
+        body { background-color: #f3f4f6; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>LifeLedger Dashboard</h1>
+<body class="text-gray-800 font-sans antialiased">
+
+    <!-- Navbar -->
+    <nav class="bg-indigo-600 text-white shadow-md">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-robot text-2xl"></i>
+                    <span class="font-bold text-xl tracking-tight">LifeLedger AI</span>
+                </div>
+                <div class="text-indigo-200 text-sm font-medium">
+                    <i class="fa-solid fa-circle text-[10px] text-green-400 mr-1 animate-pulse"></i> Agent Active
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
         
-        <div class="card">
-            <h3 style="margin-top:0">Simulate Incoming Item</h3>
-            <p style="color: #666; font-size: 14px;">Trigger scenarios to see how the agent handles them.</p>
-            <div class="simulate-box">
-                <button class="btn btn-primary sim-btn" onclick="simulate('routine electric bill email identical in amount to the past 3 months')">Scenario A: Routine Bill</button>
-                <button class="btn btn-primary sim-btn" onclick="simulate('dentist appointment reminder needing rescheduling')">Scenario B: Dentist Reschedule</button>
-                <button class="btn btn-primary sim-btn" onclick="simulate('new, unusually large invoice from MegaCorp (60% above average)')">Scenario C: Large Invoice</button>
+        <!-- Left Column: Controls -->
+        <div class="md:col-span-1 space-y-6">
+            
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="flex items-center space-x-2 mb-4 text-indigo-600">
+                    <i class="fa-solid fa-bolt"></i>
+                    <h3 class="font-semibold text-lg text-gray-900">Simulate Input</h3>
+                </div>
+                <p class="text-sm text-gray-500 mb-5">Click a scenario to send incoming tasks to the AI agent in real-time.</p>
+                
+                <div class="space-y-3">
+                    <button onclick="simulate('routine electric bill email identical in amount to the past 3 months', this)" 
+                            class="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all duration-200 group">
+                        <div class="font-medium text-sm text-gray-900 group-hover:text-indigo-700">A. Routine Bill</div>
+                        <div class="text-xs text-gray-500 mt-1">Normal $100 electric bill</div>
+                    </button>
+                    
+                    <button onclick="simulate('dentist appointment reminder needing rescheduling', this)" 
+                            class="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-yellow-300 hover:bg-yellow-50 transition-all duration-200 group">
+                        <div class="font-medium text-sm text-gray-900 group-hover:text-yellow-700">B. Schedule Nudge</div>
+                        <div class="text-xs text-gray-500 mt-1">Dentist rescheduling</div>
+                    </button>
+                    
+                    <button onclick="simulate('new, unusually large invoice from MegaCorp (60% above average)', this)" 
+                            class="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-all duration-200 group">
+                        <div class="font-medium text-sm text-gray-900 group-hover:text-red-700">C. High Risk Anomaly</div>
+                        <div class="text-xs text-gray-500 mt-1">60% higher invoice amount</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-indigo-50 rounded-xl p-5 border border-indigo-100">
+                <h4 class="text-xs font-bold text-indigo-800 uppercase tracking-wider mb-2">How it works</h4>
+                <p class="text-xs text-indigo-600 leading-relaxed">
+                    LifeLedger intercepts tasks, classifies them based on your historical profile, and either auto-resolves (Routine), asks for a 1-tap confirmation (Nudge), or flags anomalies (Review).
+                </p>
             </div>
         </div>
 
-        <div class="card">
-            <h3 style="margin-top:0">Notification Feed</h3>
-            <div id="notifications-container">
-                <p style="color: #666; font-size: 14px;">No notifications yet.</p>
+        <!-- Right Column: Notifications Feed -->
+        <div class="md:col-span-2">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 min-h-[500px]">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-semibold text-lg text-gray-900 flex items-center">
+                        <i class="fa-solid fa-inbox text-gray-400 mr-2"></i> Action Center
+                    </h3>
+                    <span id="notification-count" class="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded-full">0</span>
+                </div>
+                
+                <div id="notifications-container" class="space-y-4">
+                    <!-- Loading state or empty state -->
+                    <div class="text-center py-10">
+                        <i class="fa-solid fa-inbox text-gray-300 text-4xl mb-3"></i>
+                        <p class="text-gray-500 text-sm">Inbox Zero. No pending agent notifications.</p>
+                    </div>
+                </div>
             </div>
         </div>
+
     </div>
 
     <script>
+        function getUrgencyStyles(urgency) {
+            switch(urgency) {
+                case 'high': return { bg: 'bg-red-50', border: 'border-red-200', icon: 'fa-triangle-exclamation text-red-500', label: 'Needs Review' };
+                case 'normal': return { bg: 'bg-yellow-50', border: 'border-yellow-200', icon: 'fa-hand-sparkles text-yellow-500', label: 'Action Proposed' };
+                case 'info': default: return { bg: 'bg-green-50', border: 'border-green-200', icon: 'fa-check-circle text-green-500', label: 'Auto-Resolved' };
+            }
+        }
+
         async function loadNotifications() {
             try {
                 const res = await fetch('/api/notifications');
                 const data = await res.json();
                 const container = document.getElementById('notifications-container');
+                document.getElementById('notification-count').innerText = data.notifications.length;
                 
                 if(data.notifications.length === 0) {
-                    container.innerHTML = '<p style="color: #666; font-size: 14px;">No notifications yet.</p>';
+                    container.innerHTML = `
+                        <div class="text-center py-10 fade-in">
+                            <i class="fa-solid fa-check-double text-gray-300 text-4xl mb-3"></i>
+                            <p class="text-gray-500 text-sm">All caught up! No pending agent actions.</p>
+                        </div>`;
                     return;
                 }
 
                 container.innerHTML = '';
                 data.notifications.forEach(n => {
+                    const style = getUrgencyStyles(n.urgency);
+                    
                     const div = document.createElement('div');
-                    div.className = `notification urgency-${n.urgency}`;
-                    let html = `<div class="timestamp">${n.timestamp}</div><div>${n.message}</div>`;
+                    div.className = `fade-in rounded-lg border ${style.border} ${style.bg} p-4 shadow-sm relative overflow-hidden`;
+                    
+                    // Left color accent bar
+                    const accentColor = n.urgency === 'high' ? 'bg-red-400' : (n.urgency === 'normal' ? 'bg-yellow-400' : 'bg-green-400');
+                    
+                    let html = `
+                        <div class="absolute left-0 top-0 bottom-0 w-1 ${accentColor}"></div>
+                        <div class="flex items-start ml-2">
+                            <div class="mt-1 mr-3"><i class="fa-solid ${style.icon} text-lg"></i></div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-gray-500">${style.label}</span>
+                                    <span class="text-xs text-gray-400"><i class="fa-regular fa-clock mr-1"></i>${n.timestamp}</span>
+                                </div>
+                                <p class="text-gray-800 text-sm leading-relaxed">${n.message}</p>
+                    `;
                     
                     if (n.action_required && n.status === 'pending') {
                         html += `
-                            <div class="actions">
-                                <button class="btn btn-success" onclick="makeDecision('${n.task_id}', 'approved')">Approve</button>
-                                <button class="btn btn-warning" onclick="makeDecision('${n.task_id}', 'modified')">Modify</button>
-                                <button class="btn btn-danger" onclick="makeDecision('${n.task_id}', 'denied')">Deny</button>
+                            <div class="mt-4 flex space-x-2">
+                                <button onclick="makeDecision('${n.task_id}', 'approved')" class="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-medium rounded shadow-sm transition-colors">
+                                    <i class="fa-solid fa-check mr-1"></i> Approve
+                                </button>
+                                <button onclick="makeDecision('${n.task_id}', 'modified')" class="px-3 py-1.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs font-medium rounded shadow-sm transition-colors">
+                                    Edit
+                                </button>
+                                <button onclick="makeDecision('${n.task_id}', 'denied')" class="px-3 py-1.5 bg-white border border-gray-300 hover:bg-gray-50 text-red-600 text-xs font-medium rounded shadow-sm transition-colors">
+                                    Deny
+                                </button>
                             </div>
                         `;
                     } else if (n.status !== 'pending' && n.status !== 'logged') {
-                        html += `<div><span class="status-badge">${n.status.toUpperCase()}</span></div>`;
+                        const statusColor = n.status === 'approved' ? 'bg-green-100 text-green-800' : (n.status === 'denied' ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-800');
+                        html += `<div class="mt-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${statusColor} capitalize">${n.status}</span></div>`;
                     }
                     
+                    html += `</div></div>`;
                     div.innerHTML = html;
                     container.appendChild(div);
                 });
@@ -86,12 +169,20 @@
             }
         }
 
-        async function simulate(text) {
+        async function simulate(text, btnElement) {
+            // Visual feedback on button
+            const originalHtml = btnElement.innerHTML;
+            btnElement.innerHTML = `<div class="text-center py-2"><i class="fa-solid fa-circle-notch fa-spin text-indigo-500"></i><span class="ml-2 text-sm text-indigo-700 font-medium">Processing...</span></div>`;
+            btnElement.disabled = true;
+
             await fetch('/api/simulate', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({text: text})
             });
+            
+            btnElement.innerHTML = originalHtml;
+            btnElement.disabled = false;
             loadNotifications();
         }
 
