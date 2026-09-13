@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeLedger Dashboard</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f7; color: #1d1d1f; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { font-size: 24px; font-weight: 600; margin-bottom: 30px; }
+        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .btn { padding: 10px 15px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; font-size: 14px; margin-right: 10px; transition: background 0.2s; }
+        .btn-primary { background: #007aff; color: white; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-success { background: #34c759; color: white; }
+        .btn-danger { background: #ff3b30; color: white; }
+        .btn-warning { background: #ffcc00; color: #1d1d1f; }
+        .notification { padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #007aff; background: #f9f9f9; }
+        .urgency-high { border-left-color: #ff3b30; background: #fff0f0; }
+        .urgency-normal { border-left-color: #ffcc00; }
+        .urgency-info { border-left-color: #34c759; }
+        .actions { margin-top: 15px; }
+        .simulate-box { display: flex; gap: 10px; margin-bottom: 10px; }
+        .sim-btn { flex: 1; }
+        .timestamp { color: #86868b; font-size: 12px; margin-bottom: 5px; }
+        .status-badge { margin-top: 10px; display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; background: #e5e5ea; color: #1d1d1f; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LifeLedger Dashboard</h1>
+        
+        <div class="card">
+            <h3 style="margin-top:0">Simulate Incoming Item</h3>
+            <p style="color: #666; font-size: 14px;">Trigger scenarios to see how the agent handles them.</p>
+            <div class="simulate-box">
+                <button class="btn btn-primary sim-btn" onclick="simulate('routine electric bill email identical in amount to the past 3 months')">Scenario A: Routine Bill</button>
+                <button class="btn btn-primary sim-btn" onclick="simulate('dentist appointment reminder needing rescheduling')">Scenario B: Dentist Reschedule</button>
+                <button class="btn btn-primary sim-btn" onclick="simulate('new, unusually large invoice from MegaCorp (60% above average)')">Scenario C: Large Invoice</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-top:0">Notification Feed</h3>
+            <div id="notifications-container">
+                <p style="color: #666; font-size: 14px;">No notifications yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadNotifications() {
+            try {
+                const res = await fetch('/api/notifications');
+                const data = await res.json();
+                const container = document.getElementById('notifications-container');
+                
+                if(data.notifications.length === 0) {
+                    container.innerHTML = '<p style="color: #666; font-size: 14px;">No notifications yet.</p>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                data.notifications.forEach(n => {
+                    const div = document.createElement('div');
+                    div.className = `notification urgency-${n.urgency}`;
+                    let html = `<div class="timestamp">${n.timestamp}</div><div>${n.message}</div>`;
+                    
+                    if (n.action_required && n.status === 'pending') {
+                        html += `
+                            <div class="actions">
+                                <button class="btn btn-success" onclick="makeDecision('${n.task_id}', 'approved')">Approve</button>
+                                <button class="btn btn-warning" onclick="makeDecision('${n.task_id}', 'modified')">Modify</button>
+                                <button class="btn btn-danger" onclick="makeDecision('${n.task_id}', 'denied')">Deny</button>
+                            </div>
+                        `;
+                    } else if (n.status !== 'pending' && n.status !== 'logged') {
+                        html += `<div><span class="status-badge">${n.status.toUpperCase()}</span></div>`;
+                    }
+                    
+                    div.innerHTML = html;
+                    container.appendChild(div);
+                });
+            } catch (error) {
+                console.error("Error loading notifications:", error);
+            }
+        }
+
+        async function simulate(text) {
+            await fetch('/api/simulate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({text: text})
+            });
+            loadNotifications();
+        }
+
+        async function makeDecision(taskId, outcome) {
+            await fetch('/api/decision', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({task_id: taskId, outcome: outcome})
+            });
+            loadNotifications();
+        }
+
+        // Poll every 3 seconds for live updates
+        setInterval(loadNotifications, 3000);
+        loadNotifications();
+    </script>
+</body>
+</html>
